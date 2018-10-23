@@ -1,0 +1,13 @@
+<div class="left"><%=render :partial => "pages/left"%></div>
+<div class="center">
+  <div><%=render :partial => "pages/pankuzu"%></div>
+  <div><p>
+  <%if @page == nil%>
+    <input type="button" class="btn btn-default" onClick="location.href='<%=@path+"/"+"new"%>'" value="新規作成">
+  <%else%>
+    <input type="button" class="btn btn-default" onClick="location.href='<%=@path+"/"+"new"%>'" value="編集">
+  <%end%>
+  </p></div>
+  <div><%=raw @content%></div>
+</div>
+<div class="right"><%=render :partial => "pages/right"%></div>

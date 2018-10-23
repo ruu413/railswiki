@@ -1,0 +1,8 @@
+<div>
+  <%@left_content.each do|page|%>
+    <p>
+      <%str=page.parent+"/"+page.title%>
+      <%=link_to str,str%>
+    </p>
+  <%end%>
+</div>

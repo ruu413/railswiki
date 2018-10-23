@@ -1,0 +1,13 @@
+<div class="left"><%=render :partial => "pages/left"%></div>
+<div class="center">
+  <div><%=render :partial => "pages/pankuzu"%></div>
+  <%=form_tag('pages',method: 'put') do%>
+    <p>
+      <%= text_area_tag "content",@content,placeholder: "入力してください",:class=>"input-large"%>
+    </p>
+    <p>
+      <%=submit_tag '登録'%>
+    </p>
+  <%end%>
+</div>
+<div class="right"><%=render :partial => "pages/right"%></div>

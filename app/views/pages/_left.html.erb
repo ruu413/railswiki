@@ -1,0 +1,13 @@
+<div>
+  <%@left_content.each do|page|%>
+    <p>
+      <%if page.parent ==""||page.parent==nil%>
+        <%str="/"+page.title%>
+      <%else%>
+        <%str="/"+page.parent+"/"+page.title%>
+      <%end%>
+      <%=link_to str,str%>
+    </p>
+  <%end%>
+  　
+</div>

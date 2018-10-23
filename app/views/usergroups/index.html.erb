@@ -1,0 +1,9 @@
+<div class="left"><%=render :partial => "usergroups/left"%></div>
+<div class="center">
+  <div>
+  <%@usergroups.each do |usergroup|%>
+    <%=usergroup.name%><br/>
+  <%end%>
+  </div>
+</div>
+<div class="right"><%=render :partial => "usergroups/right"%></div>

@@ -1,0 +1,9 @@
+<%path=@path.clone.split("/")%>
+<%=link_to "/","/"%>
+<%path.each_with_index do |str, i|%>
+  <%#link_to str,"/"+path[1,i+1].join("/")%>
+  <%if i>1%>
+    <%="/"%>
+  <%end%>
+  <%=link_to str,"/"+path[1,i].join("/")%>
+<%end%>
