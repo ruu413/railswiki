@@ -70,7 +70,7 @@ ActiveRecord::Schema.define(version: 2018_11_06_102839) do
     t.integer "page_id"
     t.string "file_name"
     t.string "file_content_type"
-    t.binary "file"
+    t.string "file_path"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

@@ -25,10 +25,6 @@ class PagesController < ApplicationController
     end
   end
   def index
-    if params[:method]=="delete"#deleteのルートにたどり着けないからindexから
-      destroy
-      return
-    end
     if params[:format]==nil
       page_show
     else
@@ -44,7 +40,8 @@ class PagesController < ApplicationController
     file=nil
     file=page.uploadfiles.find_by(file_name:filename)
     if file!=nil
-      send_data(file.file,filename:file.file_name,:disposition=>"inline")
+      filedata = File.open(file.file_path,"r").read
+      send_data(filedata,filename:file.file_name,:disposition=>"inline")
     else
       #render :staturs=>404  
       #後でno imageでも返すようにする
@@ -52,9 +49,15 @@ class PagesController < ApplicationController
     #render :nothing=>true and return
   end
   def page_show
+    force_trailing_slash
     get_parent_title(params[:pages],0)
     #send_data(Uploadfile.find(2).file.download,filename:"a.png",:disposition=>"inline")
     @path=createpath(@parent,@title)
+    
+    #if(params[:pages][params[:pages].size-1]!='/')
+    #  redirect_to(@path)
+    #  return
+    #end
     #@right_content="a";
     #@left_content="b";
     @page=Page.where(parent:@parent).find_by(title:@title)
@@ -103,10 +106,6 @@ class PagesController < ApplicationController
     @method='post'
   end
   def create
-    if(params[:method]=="delete")
-      destroy
-      return
-    end
     if(params[:content]!=nil)
       page_create
     end
@@ -150,12 +149,19 @@ class PagesController < ApplicationController
       )
       #page.files.attach(params[:file][:files])
       file_=params[:files]
+      output_dir=Rails.root.join('storage/files'+@path,"")
+      FileUtils.mkdir_p(output_dir,:mode => 755)
+      output_path = Rails.root.join('storage/files'+@path,file_.original_filename)
       if file_!=nil
         file = Uploadfile.create(
           file_name: file_.original_filename,
           file_content_type: file_.content_type,
-          file: file_.tempfile.open.read
-        )
+          #file: file_.tempfile.open.read
+          file_path: output_path
+        ) 
+        File.open(output_path, 'w+b') do |fp|
+          fp.write  file_.read
+        end
         page.uploadfiles<<file
       end
       #get_parent_title(params[:pages],0)
@@ -173,10 +179,14 @@ class PagesController < ApplicationController
   end
   def edit
     @commongroup="<option value='nil'>全員</option><option value='0'>自分のみ</option>"
-get_parent_title(params[:pages],0) 
+    get_parent_title(params[:pages],0) 
     @path=createpath(@parent,@title)
     renderleft(@path[1,1000])
     @page=Page.where(parent:@parent).find_by(title:@title)
+    if @page.editable_group_id != nil &&(!Usergroup.find(@page.editable_group_id).users.ids.include?(current_user.id))
+      redirect_to(@path)
+      return
+    end
     @usergroups=Usergroup.all
     if @page==nil
       redirect_to(@path+"/new")
@@ -201,8 +211,11 @@ get_parent_title(params[:pages],0)
       editable_group_id=params[:editable_group_id].to_i
     end
     @page=Page.where(parent:@parent).find_by(title:@title)
-    if @page!=nil
-      @page.update!(content:@content,readable_group_id:readable_group_id,editable_group_id:editable_group_id)
+    #todo アクセス制限する
+    if (@page.editable_group_id == nil ||UsergroupUsergroup.find(@page.editable_group_id).users.ids.include?(current_user.id))
+      if @page!=nil
+        @page.update!(content:@content,readable_group_id:readable_group_id,editable_group_id:editable_group_id)
+      end
     end
     redirect_to(@path)
   end
@@ -243,10 +256,10 @@ get_parent_title(params[:pages],0)
       if title==""||title==nil
         return ""
       else
-        return "/"+title
+        return "/"+title+"/"
       end
     else
-      return "/"+parent+"/"+title
+      return "/"+parent+"/"+title+"/"
     end
   end
 end
