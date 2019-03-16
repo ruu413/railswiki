@@ -1,9 +1,17 @@
 <div class="left"><%=render :partial => "usergroups/left"%></div>
 <div class="center">
   <div>
-  <%@usergroups.each do |usergroup|%>
-    <%=usergroup.name%><br/>
-  <%end%>
+    <%=@usergroup.name%><br/>
+    <table class="table">
+      <tr><td>名前</td><td>ID</td><td>一言</td></tr>
+      <%@usergroup.users.each do |user|%>
+        <tr>
+          <td><%=user.name%></td>
+          <td><%=user.user_id%></td>
+          <td><%=user.description%></td>
+        </tr>
+      <%end%>
+    </table>
   </div>
 </div>
 <div class="right"><%=render :partial => "usergroups/right"%></div>

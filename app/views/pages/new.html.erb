@@ -1,11 +1,14 @@
 <div class="left"><%=render :partial => "pages/left"%></div>
 <div class="center">
   <div><%=render :partial => "pages/pankuzu"%></div>
-  <%=form_tag('pages',method: 'post') do%>
+  <%=form_tag('',method: @method,multipart: true) do%>
     <p>
-      <%= text_area_tag "content","てきすと",placeholder: "入力してください",:class=>"input-large"%>
+      <%= text_area_tag "content",@content,placeholder: "入力してください",:class=>"input-large"%>
     </p>
     <p>
+      <%=select_tag "readable_group_id",@commongroup.html_safe+options_from_collection_for_select(@usergroups,:id,:name)%>
+      <%=select_tag "editable_group_id",@commongroup.html_safe+options_from_collection_for_select(@usergroups,:id,:name)%>
+      <%=file_field_tag :files,{:multiple => true}%>
       <%=submit_tag '登録'%>
     </p>
   <%end%>

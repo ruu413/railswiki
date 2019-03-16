@@ -1,9 +1,26 @@
 <div class="left"><%=render :partial => "usergroups/left"%></div>
 <div class="center">
+  <h1>ユーザーグループの追加</h1>
   <div>
-  <%@usergroups.each do |usergroup|%>
-    <%=usergroup.name%><br/>
-  <%end%>
+    <%=form_tag("/setting/usergroups",method: "post") do%>
+      <div class ="form-group">
+        <%=label_tag "グループ名"%>
+        <%=text_field("usergroup","name",{placeholder: "グループ名"})%><br/>
+      </div>
+      <p>グループに入れたいユーザーにチェックしてください</p></br>
+      <table class="table">
+        <tr><td></td><td>名前</td><td>ユーザーID</td><td>一言</td></tr>
+        <%@users.each do |user|%>
+          <tr>
+            <td><%=check_box("usergroup","check_id",{:checked=>false,:multiple=> true},user.id.to_s,nil)%></td>
+            <td><%=user.name%></td>
+            <td><%=user.user_id%></td>
+            <td><%=user.description%></td>
+          </tr>
+        <%end%>
+      </table>
+      <%=submit_tag "登録"%>
+    <%end%>
   </div>
 </div>
 <div class="right"><%=render :partial => "usergroups/right"%></div>

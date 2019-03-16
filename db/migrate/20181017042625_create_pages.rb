@@ -5,6 +5,8 @@ class CreatePages < ActiveRecord::Migration[5.2]
       t.string :title, null: false
       t.text :content, null: false
       t.integer :last_edit_user_id, null: false
+      t.integer :editable_group_id
+      t.integer :readable_group_id
       t.timestamps
     end
   end

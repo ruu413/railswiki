@@ -6,8 +6,43 @@
     <input type="button" class="btn btn-default" onClick="location.href='<%=@path+"/"+"new"%>'" value="新規作成">
   <%else%>
     <input type="button" class="btn btn-default" onClick="location.href='<%=@path+"/"+"new"%>'" value="編集">
+    <%=button_to "削除",{:method=>"delete"},{:class=>"btn btn-default"} %>
   <%end%>
   </p></div>
+  <%#=image_tag url_for(:action => 'puts_image')%>
+  <%if false%>
+    <%@page.uploadfiles.each do |f|%>
+      <img src="/setting/files<%=@path+'/'+f.file_name%>">
+    <%end%>
+    <%#if @page.files.attached?%>
+      <%#@page.files.each do|file|%>
+        <%#=image_tag file%>
+      <%#end%>
+    <%#end%>
+  <%end%>
   <div><%=raw @content%></div>
+  <div>
+    <%if @page!=nil%>
+      <%@page.comments.each do |comment|%>
+        <p>ユーザー名 <%=comment.user.name%></p>
+        <%=comment.comment%>
+        <%=button_to("削除",:method=>"delete",:comment_id=>comment.id)%>
+      <%end%>
+      <%=form_tag do%>
+        <%=text_area_tag "comment","コメント",placeholder:"コメント"%>
+        <%=submit_tag '投稿'%>
+      <%end%>
+      <p>添付ファイル<br>
+        <%@page.uploadfiles.each do |file|%>
+          <%if @title==""%>
+            <%filepath=file.file_name%>
+          <%else%>
+            <%filepath=@title+"/"+file.file_name%>
+          <%end%>
+          <%=link_to file.file_name,filepath%>
+        <%end%>
+      </p>
+    <%end%>
+  </div>
 </div>
 <div class="right"><%=render :partial => "pages/right"%></div>
