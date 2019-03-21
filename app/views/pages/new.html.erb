@@ -8,7 +8,6 @@
     <p>
       <%=select_tag "readable_group_id",@commongroup.html_safe+options_from_collection_for_select(@usergroups,:id,:name)%>
       <%=select_tag "editable_group_id",@commongroup.html_safe+options_from_collection_for_select(@usergroups,:id,:name)%>
-      <%=file_field_tag :files,{:multiple => true}%>
       <%=submit_tag '登録'%>
     </p>
   <%end%>

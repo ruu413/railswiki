@@ -53,7 +53,6 @@ class PagesController < ApplicationController
     get_parent_title(params[:pages],0)
     #send_data(Uploadfile.find(2).file.download,filename:"a.png",:disposition=>"inline")
     @path=createpath(@parent,@title)
-    
     #if(params[:pages][params[:pages].size-1]!='/')
     #  redirect_to(@path)
     #  return
@@ -63,36 +62,24 @@ class PagesController < ApplicationController
     @page=Page.where(parent:@parent).find_by(title:@title)
     renderleft(@path[1,1000])
     if @page != nil
-      if @page.readable_group_id != nil
-        if user_signed_in?
-          begin
-            if !Usergroup.find(@page.readable_group_id).users.ids.include?(current_user.id)
-              @content = "アクセス権限なし"
-              @page=nil
-              return
-            end
-          rescue ActiveRecord::RecordNotFound#なかった場合nil設定と同じ
-            #@content ="グループないよ"
-            #return #あとでけす＃グループが存在しない場合普通に表示
-          end
-        else
-          @content = "アクセス権限なし"
-          @page=nil
-          return
-        end
-      elsif @page.readable_group_id==0
-        if current_user.id==last_edit_user_id
-          @content="アクセス権限なし"
-          @page=nil
-          return
-        end        
+      if is_editable?(@page)#編集権限を持つ
+        @editable=true
       end
-      @content = CommonMarker.render_html(@page.content)
+      if is_readable?(@page)
+        @content = CommonMarker.render_html(@page.content)
+      else
+        @page =nil
+        @content=""
+      end
     else
       @content = "未作成"
     end
   end
   def new
+    if(!user_signed_in?)
+      redirect_to @path
+      return
+    end
     get_parent_title(params[:pages],0)
     @commongroup="<option value='nil'>全員</option><option value='0'>自分のみ</option>"
     @path=createpath(@parent,@title)
@@ -106,12 +93,26 @@ class PagesController < ApplicationController
     @method='post'
   end
   def create
+    get_parent_title(params[:pages],0)
+    page=Page.where(parent:@parent).find_by(title:@title)
+    path = createpath(@parent,@title)
+    if(!user_signed_in?)
+      return
+    end
     if(params[:content]!=nil)
       page_create
     end
     if(params[:comment]!=nil)
-      comment_create
+      if(page!=nil && is_readable?(page))
+        comment_create
+      end
     end
+    file_=params[:files]
+    if file_!=nil && page!=nil&&is_editable?(page)
+      file_create file_,page
+    end
+    redirect_to path
+    return
   end
   def comment_create
     get_parent_title(params[:pages],0)
@@ -119,12 +120,15 @@ class PagesController < ApplicationController
     if(page==nil)then return end
     comment=page.comments.create(comment:ERB::Util.html_escape(params[:comment]))
     current_user.comments<<comment
-    redirect_to createpath(@parent,@title)
   end
   def page_create
     @last_edit_user_id=current_user.id
     get_parent_title(params[:pages],1)
     @path=createpath(@parent,@title)
+    if(Page.where(parent:@parent).find_by(title:@title))
+      update
+      return
+    end
     @usergroups=Usergroup.all
     if params[:readable_group_id]=="nil"
       readable_group_id=nil
@@ -148,22 +152,6 @@ class PagesController < ApplicationController
         editable_group_id: editable_group_id
       )
       #page.files.attach(params[:file][:files])
-      file_=params[:files]
-      output_dir=Rails.root.join('storage/files'+@path,"")
-      FileUtils.mkdir_p(output_dir,:mode => 755)
-      output_path = Rails.root.join('storage/files'+@path,file_.original_filename)
-      if file_!=nil
-        file = Uploadfile.create(
-          file_name: file_.original_filename,
-          file_content_type: file_.content_type,
-          #file: file_.tempfile.open.read
-          file_path: output_path
-        ) 
-        File.open(output_path, 'w+b') do |fp|
-          fp.write  file_.read
-        end
-        page.uploadfiles<<file
-      end
       #get_parent_title(params[:pages],0)
       #send_data(Uploadfile.find(1).file.download,filename:"a.png")
       #page.update(uploadfiles_files: files)
@@ -175,15 +163,38 @@ class PagesController < ApplicationController
       #  page.uploadfiles.attach(file)
       #end
     end
-    redirect_to(@path)
   end
+  def file_create file_param,page
+    get_parent_title(params[:pages],0)
+    @path=createpath(@parent,@title)
+    output_dir=Rails.root.join('storage/files'+@path,"")
+    FileUtils.mkdir_p(output_dir,:mode => 755)
+    output_path = Rails.root.join('storage/files'+@path,file_param.original_filename)
+    
+    file = Uploadfile.create(
+      file_name: file_param.original_filename,
+      file_content_type: file_param.content_type,
+      #file: file_.tempfile.open.read
+      file_path: output_path
+    ) 
+    File.open(output_path, 'w+b') do |fp|
+      fp.write  file_param.read
+    end
+    page.uploadfiles<<file
+  end
+  
   def edit
+    if(!user_signed_in?)
+      redirect_to @path
+      return
+    end
     @commongroup="<option value='nil'>全員</option><option value='0'>自分のみ</option>"
     get_parent_title(params[:pages],0) 
     @path=createpath(@parent,@title)
     renderleft(@path[1,1000])
     @page=Page.where(parent:@parent).find_by(title:@title)
-    if @page.editable_group_id != nil &&(!Usergroup.find(@page.editable_group_id).users.ids.include?(current_user.id))
+    
+    if !is_editable? @page
       redirect_to(@path)
       return
     end
@@ -199,7 +210,14 @@ class PagesController < ApplicationController
   def update
     get_parent_title(params[:pages],1)
     @path=createpath(@parent,@title)
+    
+    @page=Page.where(parent:@parent).find_by(title:@title)
+    if(!is_editable? @page)
+      redirect_to @path
+      return
+    end
     @content = ERB::Util.html_escape(params[:content])
+
     if params[:readable_group_id]=="nil"
       readable_group_id=nil
     else
@@ -210,40 +228,54 @@ class PagesController < ApplicationController
     else
       editable_group_id=params[:editable_group_id].to_i
     end
-    @page=Page.where(parent:@parent).find_by(title:@title)
-    #todo アクセス制限する
-    if (@page.editable_group_id == nil ||UsergroupUsergroup.find(@page.editable_group_id).users.ids.include?(current_user.id))
-      if @page!=nil
-        @page.update!(content:@content,readable_group_id:readable_group_id,editable_group_id:editable_group_id)
-      end
+    if @page!=nil
+      @page.update!(content:@content,readable_group_id:readable_group_id,editable_group_id:editable_group_id)
     end
     redirect_to(@path)
   end
   def destroy
+    get_parent_title(params[:pages],0)
+    path = createpath(@parent,@title)
+    if !user_signed_in? 
+      redirect_to path
+      return
+    end
+    page=Page.where(parent:@parent).find_by(title:@title)
     if params[:comment_id]!=nil
       comment_destroy
     elsif params[:file_id]!=nil
-      file_destroy
+      if is_editable? page
+        file_destroy
+      end
     else
-      page_destroy
+      if is_editable? page
+        page_destroy
+      end
     end
-    get_parent_title(params[:pages],0)
-    redirect_to(createpath(@parent,@title))
+    redirect_to path
   end
   def page_destroy
     get_parent_title(params[:pages],0)
     page=Page.where(parent:@parent).find_by(title:@title)
-    page.destroy
+    if page!=nil
+      page.destroy
+    end
   end
   def file_destroy
     get_parent_title(params[:pages],0)
     page=Page.where(parent:@parent).find_by(title:@title)
-    page.uploadfiles.find(params[:file_id].to_i).destroy
+    file = page.uploadfiles.find(params[:file_id].to_i)
+    if file !=nil
+      file.destroy
+    end
   end
   def comment_destroy
     get_parent_title(params[:pages],0)
     page=Page.where(parent:@parent).find_by(title:@title)
-    page.comments.find(params[:comment_id].to_i).destroy
+    comment = page.comments.find(params[:comment_id].to_i)
+    if comment !=nil
+      comment.destroy
+    end
   end
   def renderleft str
     if str == nil then str = "" end
@@ -261,5 +293,53 @@ class PagesController < ApplicationController
     else
       return "/"+parent+"/"+title+"/"
     end
+  end
+  def is_editable? page
+    if page == nil||!user_signed_in?
+      return false
+    elsif page.editable_group_id == nil
+      return true
+    elsif page.editable_group_id == 0
+      if(current_user!=nil&& page.last_edit_user_id==current_user.id)
+        return true
+      else
+        return false
+      end
+    end
+    begin
+      if Usergroup.find(page.editable_group_id).users.ids.include?(current_user.id)
+        return true
+      else
+        return false
+      end
+    rescue ActiveRecord::RecordNotFound
+      return true
+    end
+    return false
+  end
+
+  def is_readable? page
+    if page.readable_group_id ==nil
+      return true
+    elsif page.readable_group_id == 0
+      if(current_user!=nil&& page.last_edit_user_id==current_user.id)
+        return true
+      else
+        return false
+      end
+    elsif user_signed_in?
+      return false
+    end
+    
+    begin
+      if Usergroup.find(page.readable_group_id).users.ids.include?(current_user.id)
+        return true
+      else
+        return false
+      end
+    rescue ActiveRecord::RecordNotFound
+      return true
+    end
+    return false
   end
 end
