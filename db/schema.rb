@@ -44,7 +44,7 @@ ActiveRecord::Schema.define(version: 2018_11_06_102839) do
   create_table "emojis", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "name"
     t.integer "user_id"
-    t.binary "image"
+    t.string "file_name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -61,7 +61,10 @@ ActiveRecord::Schema.define(version: 2018_11_06_102839) do
   end
 
   create_table "updatehistories", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.integer "page_id"
     t.integer "user_id"
+    t.text "content"
+    t.datetime "update_time"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

@@ -2,7 +2,7 @@
 <div class="center">
   <div>
   <%@usergroups.each do |usergroup|%>
-    <%=usergroup.name%><br/>
+    <%=link_to usergroup.name,usergroup.id.to_s%>人数:<%=usergroup.users.size%>
   <%end%>
   </div>
 </div>

@@ -3,6 +3,6 @@ class Page < ApplicationRecord
   #mount_uploader :file, FileUploader 
   has_many :uploadfiles#, dependent: :destroy
   has_many :comments,dependent: :destroy
-  has_many :updatehistorys
+  has_many :updatehistorys,dependent: :destroy
   #accepts_attachments_for :uploadfiles, attachment: :file
 end

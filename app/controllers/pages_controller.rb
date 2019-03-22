@@ -1,7 +1,7 @@
 class PagesController < ApplicationController
   before_action :authenticate_user!, only: [:new,:edit,:create,:update]
   #before_action ->{renderleft("")},only: [:index,:new,:create]
-  protect_from_forgery except: :create
+  #protect_from_forgery except: :create
  
 
   def get_parent_title(name,num)#切り取る数
@@ -100,6 +100,8 @@ class PagesController < ApplicationController
       return
     end
     if(params[:content]!=nil)
+      get_parent_title(params[:pages],1)
+      path = createpath(@parent,@title)
       page_create
     end
     if(params[:comment]!=nil)
@@ -151,6 +153,12 @@ class PagesController < ApplicationController
         readable_group_id: readable_group_id,
         editable_group_id: editable_group_id
       )
+      history = Updatehistory.create(
+        update_time: page.updated_at,
+        content: page.content,
+        user_id: page.last_edit_user_id,
+      )
+      page.updatehistorys<<history
       #page.files.attach(params[:file][:files])
       #get_parent_title(params[:pages],0)
       #send_data(Uploadfile.find(1).file.download,filename:"a.png")
@@ -230,6 +238,12 @@ class PagesController < ApplicationController
     end
     if @page!=nil
       @page.update!(content:@content,readable_group_id:readable_group_id,editable_group_id:editable_group_id)
+      history = Updatehistory.create(
+        update_time: @page.updated_at,
+        content: @page.content,
+        user_id: @page.last_edit_user_id,
+      )
+      @page.updatehistorys<<history
     end
     redirect_to(@path)
   end
