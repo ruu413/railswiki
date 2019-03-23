@@ -1,1 +1,10 @@
-<div><%=@right_content%></div>
+<div>
+  <%@right_content.each do |path|%>
+  　<%if(path == "")%>
+      <%=link_to "/",path%><br>
+    <%else%>
+      <%=link_to path,path%><br>
+    <%end%>
+  <% end %>
+  　
+</div>

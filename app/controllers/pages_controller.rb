@@ -61,6 +61,7 @@ class PagesController < ApplicationController
     #@left_content="b";
     @page=Page.where(parent:@parent).find_by(title:@title)
     renderleft(@path[1,1000])
+    renderright
     if @page != nil
       if is_editable?(@page)#編集権限を持つ
         @editable=true
@@ -85,6 +86,7 @@ class PagesController < ApplicationController
     @path=createpath(@parent,@title)
     @usergroups=Usergroup.all
     renderleft(@path[1,1000])
+    renderright
     @page=Page.where(parent:@parent).find_by(title:@title)
     if @page!=nil
       redirect_to(@path+"/edit")
@@ -200,6 +202,7 @@ class PagesController < ApplicationController
     get_parent_title(params[:pages],0) 
     @path=createpath(@parent,@title)
     renderleft(@path[1,1000])
+    renderright
     @page=Page.where(parent:@parent).find_by(title:@title)
     
     if !is_editable? @page
@@ -292,10 +295,22 @@ class PagesController < ApplicationController
     end
   end
   def renderleft str
-    if str == nil then str = "" end
-    @left_content = Page.where(parent:str)
+    if str == nil || str == "/" then str = "" end
+    if str.end_with? "/" then str.chop! end
+    children = Page.where(parent:str).select(:parent,:title)
+    @left_content=[]
+    children.each do |child|
+      path = createpath(child.parent,child.title)
+      if(child.title=="")then next end
+      @left_content+=[[child.title,path]]
+    end
   end
-  def renderright str
+  def renderright
+    new50 = Page.limit(50).order("updated_at DESC").select(:parent,:title)
+    @right_content=[]
+    new50.each do |item|
+      @right_content+=[createpath(item.parent,item.title)]
+    end
   end
   def createpath( parent, title)
     if parent==""||parent==nil
