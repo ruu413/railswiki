@@ -1,5 +1,24 @@
 class ApplicationController < ActionController::Base
 end
 def force_trailing_slash
-    redirect_to "#{request.original_url}/" unless request.original_url.match(/\/$/)
+    url = request.original_url
+    url_ = url.split("?")
+    if url_.size >1
+        option = url_.pop
+    end
+    if option != "" &&option !=nil
+        option = "?"+option
+    end
+    url_body = url_.join
+    if(url_body == nil)
+        url_body = ""
+    end
+    redirecturl = url_body
+    redirecturl += "/" unless url_body.match(/\/$/)
+    if option != nil
+        redirecturl += option
+    end
+    if redirecturl != url
+        redirect_to redirecturl
+    end
 end

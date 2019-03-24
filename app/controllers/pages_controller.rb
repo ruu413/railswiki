@@ -89,7 +89,7 @@ class PagesController < ApplicationController
     renderright
     @page=Page.where(parent:@parent).find_by(title:@title)
     if @page!=nil
-      redirect_to(@path+"/edit")
+      redirect_to(@path+"edit")
     end
     @content=''
     @method='post'

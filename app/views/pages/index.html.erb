@@ -5,6 +5,8 @@
   <%if @page == nil%>
     <input type="button" class="btn btn-default" onClick="location.href='<%=@path+"new"%>'" value="新規作成">
   <%else%>
+    <h2><%=@page.title%></h2>
+    <p>last edited by <%=User.find(@page.last_edit_user_id).name%></p>
     <input type="button" class="btn btn-default" onClick="location.href='<%=@path+"new"%>'" value="編集">
     <%#button_to "削除",{:method=>"delete"},{:class=>"btn btn-default"} %>
     <%=button_to "削除",{:action => "destroy"},:class=>"btn btn-default",:method=>:delete %>
@@ -46,6 +48,13 @@
           <%=link_to file.file_name,filepath%>
         <%end%>
       </p>
+      <p>変更履歴</p>
+      <%@page.updatehistorys.limit(100).each do |hist|%>
+        <p>
+          <%=hist.update_time.to_s%><br>
+          <%=User.find(hist.user_id).name%>
+        </p>
+      <%end%>
     <%end%>
   </div>
 </div>

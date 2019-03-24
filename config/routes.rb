@@ -5,12 +5,12 @@ Rails.application.routes.draw do
       :registrations => 'user/registrations',
       :sessions => 'user/sessions'
     }
-    scope '/files' do
-      get '/*pages/:file' =>'files#show'
-      get '/:file'=>'files#show'
-      get '/'=>'files#index'
-      delete '/'=>'files#destroy'
-    end
+    #scope '/files' do
+    #  get '/*pages/:file' =>'files#show'
+    #  get '/:file'=>'files#show'
+    #  get '/'=>'files#index'
+    #  delete '/'=>'files#destroy'
+    #end
     #devise_for :user do
     #scope '/setting' do
     #  get '/sign_in' => 'user/sessions#new',:as => :new_user_session
