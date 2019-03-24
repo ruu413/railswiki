@@ -6,26 +6,32 @@ class PagesController < ApplicationController
 
   def get_parent_title(name,num)#切り取る数
     if name==nil
-      @parent=""
-      @title=""
-      return
+      parent=""
+      title=""
+      return parent,title
     end
-    @parent = name.split("/")
+    parent = name.split("/")
     num.times do
-      @parent.pop
+      parent.pop
     end
-    @title=@parent.pop
-    @parent=@parent.join("/")
+    title=parent.pop
+    parent=parent.join("/")
     #while @parent[0]=='/' do @parent=@parent[1,1000] end
-    if @title==nil
-      @title=""
+    if title==nil
+      title=""
     end
-    if @parent==nil
-      @parent=""
+    if parent==nil
+      parent=""
     end
+    return parent,title
   end
   def index
     if params[:format]==nil
+      
+      if(!is_valid_url?)
+        redirect_to ""
+        return
+      end
       page_show
     else
       file_show
@@ -33,9 +39,9 @@ class PagesController < ApplicationController
     end
   end
   def file_show
-    get_parent_title(params[:pages],0)
+    @parent,@title=get_parent_title(params[:pages],0)
     filename=@title+"."+params[:format]
-    get_parent_title(params[:pages],1)
+    @parent,@title=get_parent_title(params[:pages],1)
     page=Page.where(parent:@parent).find_by(title:@title)
     file=nil
     file=page.uploadfiles.find_by(file_name:filename)
@@ -50,7 +56,7 @@ class PagesController < ApplicationController
   end
   def page_show
     force_trailing_slash
-    get_parent_title(params[:pages],0)
+    @parent,@title=get_parent_title(params[:pages],0)
     #send_data(Uploadfile.find(2).file.download,filename:"a.png",:disposition=>"inline")
     @path=createpath(@parent,@title)
     #if(params[:pages][params[:pages].size-1]!='/')
@@ -77,11 +83,15 @@ class PagesController < ApplicationController
     end
   end
   def new
+    if(!is_valid_url?)
+      redirect_to ""
+      return
+    end
     if(!user_signed_in?)
       redirect_to @path
       return
     end
-    get_parent_title(params[:pages],0)
+    @parent,@title=get_parent_title(params[:pages],0)
     @commongroup="<option value='nil'>全員</option><option value='0'>自分のみ</option>"
     @path=createpath(@parent,@title)
     @usergroups=Usergroup.all
@@ -98,14 +108,18 @@ class PagesController < ApplicationController
     @method='post'
   end
   def create
-    get_parent_title(params[:pages],0)
+    if(!is_valid_url?)
+      redirect_to ""
+      return
+    end
+    @parent,@title=get_parent_title(params[:pages],0)
     page=Page.where(parent:@parent).find_by(title:@title)
     path = createpath(@parent,@title)
     if(!user_signed_in?)
       return
     end
     if(params[:content]!=nil)
-      get_parent_title(params[:pages],1)
+      @parent,@title=get_parent_title(params[:pages],1)
       path = createpath(@parent,@title)
       page_create
     end
@@ -122,7 +136,7 @@ class PagesController < ApplicationController
     return
   end
   def comment_create
-    get_parent_title(params[:pages],0)
+    @parent,@title=get_parent_title(params[:pages],0)
     page=Page.where(parent:@parent).find_by(title:@title)
     if(page==nil)then return end
     comment=page.comments.create(comment:ERB::Util.html_escape(params[:comment]))
@@ -130,7 +144,7 @@ class PagesController < ApplicationController
   end
   def page_create
     @last_edit_user_id=current_user.id
-    get_parent_title(params[:pages],1)
+    @parent,@title=get_parent_title(params[:pages],1)
     @path=createpath(@parent,@title)
     if(Page.where(parent:@parent).find_by(title:@title))
       update
@@ -178,7 +192,7 @@ class PagesController < ApplicationController
     end
   end
   def file_create file_param,page
-    get_parent_title(params[:pages],0)
+    @parent,@title=get_parent_title(params[:pages],0)
     @path=createpath(@parent,@title)
     output_dir=Rails.root.join('storage/files'+@path,"")
     FileUtils.mkdir_p(output_dir,:mode => 755)
@@ -197,12 +211,16 @@ class PagesController < ApplicationController
   end
   
   def edit
+    if(!is_valid_url?)
+      redirect_to ""
+      return
+    end
     if(!user_signed_in?)
       redirect_to @path
       return
     end
     @commongroup="<option value='nil'>全員</option><option value='0'>自分のみ</option>"
-    get_parent_title(params[:pages],0) 
+    @parent,@title=get_parent_title(params[:pages],0) 
     @path=createpath(@parent,@title)
     renderleft(@path[1,1000])
     renderright
@@ -225,7 +243,11 @@ class PagesController < ApplicationController
     render :action=>'new'
   end
   def update
-    get_parent_title(params[:pages],1)
+    if(!is_valid_url?)
+      redirect_to ""
+      return
+    end
+    @parent,@title=get_parent_title(params[:pages],1)
     @path=createpath(@parent,@title)
     
     @page=Page.where(parent:@parent).find_by(title:@title)
@@ -257,7 +279,11 @@ class PagesController < ApplicationController
     redirect_to(@path)
   end
   def destroy
-    get_parent_title(params[:pages],0)
+    if(!is_valid_url?)
+      redirect_to ""
+      return
+    end
+    @parent,@title=nt_title(params[:pages],0)
     path = createpath(@parent,@title)
     if !user_signed_in? 
       redirect_to path
@@ -278,14 +304,14 @@ class PagesController < ApplicationController
     redirect_to path
   end
   def page_destroy
-    get_parent_title(params[:pages],0)
+    @parent,@title=get_parent_title(params[:pages],0)
     page=Page.where(parent:@parent).find_by(title:@title)
     if page!=nil
       page.destroy
     end
   end
   def file_destroy
-    get_parent_title(params[:pages],0)
+    @parent,@title=get_parent_title(params[:pages],0)
     page=Page.where(parent:@parent).find_by(title:@title)
     file = page.uploadfiles.find(params[:file_id].to_i)
     if file !=nil
@@ -293,7 +319,7 @@ class PagesController < ApplicationController
     end
   end
   def comment_destroy
-    get_parent_title(params[:pages],0)
+    @parent,@title=get_parent_title(params[:pages],0)
     page=Page.where(parent:@parent).find_by(title:@title)
     comment = page.comments.find(params[:comment_id].to_i)
     if comment !=nil
@@ -376,5 +402,28 @@ class PagesController < ApplicationController
       return true
     end
     return false
+  end
+
+  def is_valid_url?
+    parent=params[:pages]
+    if parent == nil
+      return true
+    end
+    url = request.original_url
+    if(url.split("?").size()>=2||parent.include?(".")||parent.include?("?")||parent.include?("#"))
+      return false
+    end
+    tmp = parent.split("/")
+    if(tmp[tmp.size()-1]=="new"||tmp[tmp.size()-1]=="edit")
+      tmp.pop
+      parent=tmp.join
+    end
+    while(parent!="")do
+      parent,title=get_parent_title(parent,0)
+      if title == "new"||title=="edit"
+        return false
+      end
+    end
+    return true;
   end
 end
