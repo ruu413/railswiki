@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>KokenForum</title>
+    <title>KokenWiki</title>
     <%= csrf_meta_tags %>
 
     <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>
@@ -10,6 +10,9 @@
 
   <body>
     <%= render partial: "layouts/navbar" %>
+    <!--<%#if @alert %>
+      <div style = "color:0000FF;"><%=@alert%></div>
+    <%#end%>-->
     <div class="clearfix">
       <%= yield%>
     </div>    

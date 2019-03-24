@@ -12,7 +12,8 @@
         <%if !user_signed_in?%>
           <%=link_to("新規登録",new_user_registration_path,class: "nav-link")%>
         <%else%>
-          <%=link_to("プロフィール変更",edit_user_registration_path,class: "nav-link")%>
+          <%#link_to("プロフィール変更",edit_user_registration_path,class: "nav-link")%>
+          <%=link_to("設定","/setting",class: "nav-link")%>
         <%end%>
       </li>
       <li class="nav-item">

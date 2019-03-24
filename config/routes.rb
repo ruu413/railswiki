@@ -31,6 +31,14 @@ Rails.application.routes.draw do
     #end
 
     resources :usergroups
+    get "*pages" => "settings#index"
+    post "*pages" => "settings#index"
+    put "*pages" => "settings#index"
+    delete "*pages" => "settings#index"
+    get "/" => "settings#index"
+    post "/" => "settings#index"
+    put "/" => "settings#index"
+    delete "/" => "settings#index"
   end
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
   

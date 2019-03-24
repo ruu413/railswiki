@@ -1,17 +1,22 @@
-<div class="left"><%=render :partial => "usergroups/left"%></div>
+<div class="left"><%=render :partial => "settings/left"%></div>
 <div class="center">
   <div>
-    <%=@usergroup.name%><br/>
+    <h3><%=@usergroup.name%></h3><br/>
+    <div style= "float:left;">
+    <%=button_to "編集",{:action => "edit"},:class=>"btn btn-default" %>
+    </div><div style= "float:right;">
+    <%=button_to "削除",{:action => "destroy"},:class=>"btn btn-danger",:method=>:delete  %>
+    </div>
+    <div>
     <table class="table">
-      <tr><td>名前</td><td>ID</td><td>一言</td></tr>
+      <tr><td>名前</td><td>一言</td></tr>
       <%@usergroup.users.each do |user|%>
         <tr>
           <td><%=user.name%></td>
-          <td><%=user.user_id%></td>
           <td><%=user.description%></td>
         </tr>
       <%end%>
     </table>
+    </div>
   </div>
 </div>
-<div class="right"><%=render :partial => "usergroups/right"%></div>

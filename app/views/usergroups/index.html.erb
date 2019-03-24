@@ -1,9 +1,18 @@
-<div class="left"><%=render :partial => "usergroups/left"%></div>
+<div class="left"><%=render :partial => "settings/left"%></div>
 <div class="center">
-  <div>
-  <%@usergroups.each do |usergroup|%>
-    <%=link_to usergroup.name,usergroup.id.to_s%>人数:<%=usergroup.users.size%>
-  <%end%>
-  </div>
+  <h2>ユーザーグループ設定</h2>
+    <input type="button" class="btn btn-default" onClick="location.href='new'" value="新規作成">
+  <div><table class="table">
+    <tr><td>グループ名</td><td>人数</td>
+    <%@usergroups.each do |usergroup|%>
+      <tr>
+        <td>
+          <%=link_to usergroup.name,usergroup.id.to_s%>
+        </td>
+        <td>
+          <%=usergroup.users.size%>
+        <td>
+      </tr>
+    <%end%>
+  </table></div>
 </div>
-<div class="right"><%=render :partial => "usergroups/right"%></div>

@@ -29,7 +29,7 @@ class PagesController < ApplicationController
     if params[:format]==nil
       
       if(!is_valid_url?)
-        redirect_to ""
+        redirect_400
         return
       end
       page_show
@@ -84,7 +84,7 @@ class PagesController < ApplicationController
   end
   def new
     if(!is_valid_url?)
-      redirect_to ""
+      redirect_400
       return
     end
     if(!user_signed_in?)
@@ -109,7 +109,7 @@ class PagesController < ApplicationController
   end
   def create
     if(!is_valid_url?)
-      redirect_to ""
+      redirect_400
       return
     end
     @parent,@title=get_parent_title(params[:pages],0)
@@ -212,7 +212,7 @@ class PagesController < ApplicationController
   
   def edit
     if(!is_valid_url?)
-      redirect_to ""
+      redirect_400
       return
     end
     if(!user_signed_in?)
@@ -244,7 +244,7 @@ class PagesController < ApplicationController
   end
   def update
     if(!is_valid_url?)
-      redirect_to ""
+      redirect_400
       return
     end
     @parent,@title=get_parent_title(params[:pages],1)
@@ -280,7 +280,7 @@ class PagesController < ApplicationController
   end
   def destroy
     if(!is_valid_url?)
-      redirect_to ""
+      redirect_400
       return
     end
     @parent,@title=nt_title(params[:pages],0)
@@ -425,5 +425,8 @@ class PagesController < ApplicationController
       end
     end
     return true;
+  end
+  def redirect_400
+    redirect_to "/400" #,{:status => 400}
   end
 end
