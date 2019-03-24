@@ -89,6 +89,9 @@ class PagesController < ApplicationController
     renderright
     @page=Page.where(parent:@parent).find_by(title:@title)
     if @page!=nil
+      if @path == ""
+        @path = "/"
+      end
       redirect_to(@path+"edit")
     end
     @content=''
@@ -209,9 +212,12 @@ class PagesController < ApplicationController
       redirect_to(@path)
       return
     end
-    @usergroups=Usergroup.all
+    @usergroups=current_user.usergroups
     if @page==nil
-      redirect_to(@path+"/new")
+      if @path == ""
+        @path = "/"
+      end
+      redirect_to(@path+"new")
       return
     end
     @content=@page.content
