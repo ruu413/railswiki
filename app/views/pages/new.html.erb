@@ -6,12 +6,12 @@
       <%= text_area_tag "content",@content,placeholder: "入力してください",:class=>"input-large"%>
     </p>
     <p>
-      <%if @page == nil||@page.readable_group_id==nil||@page.readable_group_id==0||Usergroup.find_by(id:readable_group_id)==nil%>
+      <%if @page == nil||@page.readable_group_id==nil||@page.readable_group_id==0||Usergroup.find_by(id:@page.readable_group_id)==nil%>
         <%=select_tag "readable_group_id",@commongroup_readable.html_safe+options_from_collection_for_select(@usergroups,:id,:name)%>
       <%else%>
         <%=select_tag "readable_group_id",@commongroup_readable.html_safe+options_from_collection_for_select(@usergroups,:id,:name,@page.readable_group_id)%>
       <%end%>
-      <%if @page == nil||@page.editable_group_id==nil||@page.editable_group_id==0||Usergroup.find_by(id:editable_group_id)==nil%>
+      <%if @page == nil||@page.editable_group_id==nil||@page.editable_group_id==0||Usergroup.find_by(id:@page.editable_group_id)==nil%>
         <%=select_tag "editable_group_id",@commongroup_editable.html_safe+options_from_collection_for_select(@usergroups,:id,:name)%>
       <%else%>
         <%=select_tag "editable_group_id",@commongroup_editable.html_safe+options_from_collection_for_select(@usergroups,:id,:name,@page.editable_group_id)%>
