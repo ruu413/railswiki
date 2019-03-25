@@ -84,6 +84,9 @@ class UsergroupsController < ApplicationController
     if !user_signed_in?
       return false
     end
+    if is_admin? current_user
+      return true
+    end
     if usergroup == nil
       return false
     end

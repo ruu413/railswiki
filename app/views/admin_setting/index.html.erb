@@ -1,0 +1,19 @@
+<div class="left"><%=render :partial => "settings/left"%></div>
+<div class="center">
+<table class = "table">
+<tr><td>ユーザー名</td><td>メールアドレス</td><td>管理者</td></tr>
+<%@users.each do |user|%>
+  <tr>
+    <td><%=user.name%></td>
+    <td><%=user.email%></td>
+    <td>
+      <%if user.admin%>
+        <%=button_to("管理者から外す",{:action =>"update",:user_id=>user.id,:admin=>"false"},:class=>"btn btn-danger",:method=>:put)%>
+      <%else%>
+        <%=button_to("管理者にする",{:action =>"update",:user_id=>user.id,:admin=>"true"},:class=>"btn btn-default",:method=>:put)%>
+      <%end%>
+    </td>
+  </tr>
+<%end%>
+</table>
+</div>

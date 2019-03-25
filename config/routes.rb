@@ -32,6 +32,10 @@ Rails.application.routes.draw do
 
     resources :usergroups
     get "/usergroups/*id/edit/" => "usergroups#edit"
+    get "/userlock" => "userlock#index"
+    put "/userlock" => "userlock#update"
+    get "/admin" => "admin_setting#index"
+    put "/admin" => "admin_setting#update"
     get "*pages" => "settings#index"
     post "*pages" => "settings#index"
     put "*pages" => "settings#index"

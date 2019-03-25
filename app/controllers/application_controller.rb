@@ -1,6 +1,5 @@
 class ApplicationController < ActionController::Base
-end
-def force_trailing_slash
+  def force_trailing_slash
     url = request.original_url
     url_ = url.split("?")
     if url_.size >1
@@ -21,4 +20,12 @@ def force_trailing_slash
     if redirecturl != url
         redirect_to redirecturl
     end
+  end
+
+  def is_admin? user
+    if user.admin
+      return true
+    end
+    return false
+  end
 end

@@ -406,7 +406,6 @@ class PagesController < ApplicationController
     elsif !user_signed_in?
       return false
     end
-    
     begin
       if Usergroup.find(page.readable_group_id).users.ids.include?(current_user.id)
         return true
