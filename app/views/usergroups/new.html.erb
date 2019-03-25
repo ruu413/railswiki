@@ -7,7 +7,7 @@
         <%=label_tag "グループ名"%>
         <%=text_field("usergroup","name",{placeholder: "グループ名(重複不可)"})%><br/>
       </div>
-      <p>グループに入れたいユーザーにチェックしてください</p></br>
+      <p>グループに入れたいユーザーにチェックしてください</p><br>
       <table class="table">
         <tr><td></td><td>名前</td><td>一言</td></tr>
         <%@users.each do |user|%>

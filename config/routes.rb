@@ -31,7 +31,7 @@ Rails.application.routes.draw do
     #end
 
     resources :usergroups
-    get "usergroups/*id/edit/" => "usergroups#edit"
+    get "/usergroups/*id/edit/" => "usergroups#edit"
     get "*pages" => "settings#index"
     post "*pages" => "settings#index"
     put "*pages" => "settings#index"

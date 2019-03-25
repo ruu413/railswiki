@@ -14,7 +14,7 @@ class User::RegistrationsController < Devise::RegistrationsController
     super
     userparam=params[:user]
     createuser=User.find_by(email:userparam[:email])
-    createuser.update!(user_id: userparam[:user_id],name: userparam[:name])
+    createuser.update!(name: userparam[:name])
     #user.update!(name:"aa")
   end
 

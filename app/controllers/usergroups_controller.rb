@@ -1,4 +1,5 @@
 class UsergroupsController < ApplicationController
+  before_action :authenticate_user!
   def index
     force_trailing_slash
     @usergroups=Usergroup.all
@@ -34,14 +35,17 @@ class UsergroupsController < ApplicationController
     #force_trailing_slash
     id=params[:id]
     @usergroup=Usergroup.find(id.to_i)
+    if is_editable? @usergroup
+      @editable = true
+    end
   end
   def edit
     id=params[:id]
     
     @usergroup=Usergroup.find(id.to_i)
-    if(@usergroup.create_user_id != current_user.id)
-      #redirect_to :action => "index"
-      #return
+    if !is_editable? @usergroup
+      redirect_to :action => "show"
+      return
     end
     @users=User.all
   end
@@ -49,14 +53,14 @@ class UsergroupsController < ApplicationController
     id=params[:id]
     
     usergroup=Usergroup.find(id.to_i)
-    if usergroup
-      redirect_to :action =>"index"
+    if ! is_editable? usergroup
+      redirect_to :action => "index"
       return
     end
-    usergroup.update(
-      name:params[:usergroup][:name]
-    )
-    usergroup.clear
+    #usergroup.update(
+    #  name:params[:usergroup][:name]
+    #)
+    usergroup.users.clear
     params[:usergroup][:check_id].each do |s|
       user =User.find_by(id:s.to_i)
       if(user)
@@ -70,10 +74,23 @@ class UsergroupsController < ApplicationController
     id = params[:id]
     
     usergroup=Usergroup.find(id.to_i)
-    if(usergroup.create_user_id == current_user.id)
+    if(is_editable? usergroup)
       usergroup.destroy!
     end
     redirect_to :action => "index"
     return
+  end
+  def is_editable? usergroup
+    if !user_signed_in?
+      return false
+    end
+    if usergroup == nil
+      return false
+    end
+    if usergroup.create_user_id == current_user.id
+    #usergroup.users.ids.include? current_user.id
+      return true
+    end
+    return false
   end
 end

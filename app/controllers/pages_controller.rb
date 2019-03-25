@@ -73,10 +73,11 @@ class PagesController < ApplicationController
         @editable=true
       end
       if is_readable?(@page)
+        @readable=true
         @content = CommonMarker.render_html(@page.content)
       else
         @page =nil
-        @content=""
+        @content="アクセス権限がありません"
       end
     else
       @content = "未作成"
@@ -92,7 +93,8 @@ class PagesController < ApplicationController
       return
     end
     @parent,@title=get_parent_title(params[:pages],0)
-    @commongroup="<option value='nil'>全員</option><option value='0'>自分のみ</option>"
+    @commongroup_editable="<option value='nil'>全員</option><option value='0'>自分のみ</option>"
+    @commongroup_readable="<option value='nil'>全員</option><option value='0'>自分のみ</option>"
     @path=createpath(@parent,@title)
     @usergroups=Usergroup.all
     renderleft(@path[1,1000])
@@ -211,6 +213,10 @@ class PagesController < ApplicationController
   end
   
   def edit
+    @parent,@title=get_parent_title(params[:pages],0) 
+    @path=createpath(@parent,@title)
+    renderleft(@path[1,1000])
+    renderright
     if(!is_valid_url?)
       redirect_400
       return
@@ -219,18 +225,7 @@ class PagesController < ApplicationController
       redirect_to @path
       return
     end
-    @commongroup="<option value='nil'>全員</option><option value='0'>自分のみ</option>"
-    @parent,@title=get_parent_title(params[:pages],0) 
-    @path=createpath(@parent,@title)
-    renderleft(@path[1,1000])
-    renderright
     @page=Page.where(parent:@parent).find_by(title:@title)
-    
-    if !is_editable? @page
-      redirect_to(@path)
-      return
-    end
-    @usergroups=current_user.usergroups
     if @page==nil
       if @path == ""
         @path = "/"
@@ -238,6 +233,23 @@ class PagesController < ApplicationController
       redirect_to(@path+"new")
       return
     end
+    @commongroup_editable="<option value='nil'>全員</option><option value='0'>自分のみ</option>"
+    @commongroup_readable="<option value='nil'>全員</option><option value='0'>自分のみ</option>"
+    if(@page.editable_group_id == nil)
+      @commongroup_editable="<option value='nil' selected='selected'>全員</option><option value='0'>自分のみ</option>"
+    elsif @page.editable_group_id == 0
+      @commongroup_editable="<option value='nil'>全員</option><option value='0' selected='selected'>自分のみ</option>"
+    end
+    if(@page.readable_group_id == nil)
+      @commongroup_readable="<option value='nil' selected='selected'>全員</option><option value='0'>自分のみ</option>"
+    elsif @page.readable_group_id == 0
+      @commongroup_readable="<option value='nil'>全員</option><option value='0' selected='selected'>自分のみ</option>"
+    end
+    if !is_editable? @page
+      redirect_to(@path)
+      return
+    end
+    @usergroups=current_user.usergroups
     @content=@page.content
     @method='put'
     render :action=>'new'
@@ -283,7 +295,7 @@ class PagesController < ApplicationController
       redirect_400
       return
     end
-    @parent,@title=nt_title(params[:pages],0)
+    @parent,@title=get_parent_title(params[:pages],0)
     path = createpath(@parent,@title)
     if !user_signed_in? 
       redirect_to path
@@ -361,11 +373,14 @@ class PagesController < ApplicationController
     elsif page.editable_group_id == nil
       return true
     elsif page.editable_group_id == 0
-      if(current_user!=nil&& page.last_edit_user_id==current_user.id)
+      if(user_signed_in?&& page.last_edit_user_id==current_user.id)
         return true
       else
         return false
       end
+    end
+    if !user_signed_in?
+      return false
     end
     begin
       if Usergroup.find(page.editable_group_id).users.ids.include?(current_user.id)
@@ -373,7 +388,7 @@ class PagesController < ApplicationController
       else
         return false
       end
-    rescue ActiveRecord::RecordNotFound
+    rescue =>e
       return true
     end
     return false
@@ -383,12 +398,12 @@ class PagesController < ApplicationController
     if page.readable_group_id ==nil
       return true
     elsif page.readable_group_id == 0
-      if(current_user!=nil&& page.last_edit_user_id==current_user.id)
+      if(user_signed_in?&& page.last_edit_user_id==current_user.id)
         return true
       else
         return false
       end
-    elsif user_signed_in?
+    elsif !user_signed_in?
       return false
     end
     
@@ -398,10 +413,10 @@ class PagesController < ApplicationController
       else
         return false
       end
-    rescue ActiveRecord::RecordNotFound
+    rescue =>e
       return true
     end
-    return false
+    return true
   end
 
   def is_valid_url?

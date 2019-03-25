@@ -1,12 +1,12 @@
 <div class="left"><%=render :partial => "settings/left"%></div>
 <div class="center">
-  <h3>ユーザーグループの編集</h3>
+  <h3>ユーザーグループ <%=@usergroup.name%>の編集</h3>
   <div>
     <%=form_tag("/setting/usergroups",method: "post") do%>
-      <div class="form-group">
-        <%=label_tag "グループ名"%>
-        <%=text_field("usergroup","name",{placeholder: "グループ名(重複不可)"})%><br/>
-      </div>
+      <!--<div class="form-group">
+        <%#=label_tag "グループ名"%>
+        <%#=text_field("usergroup","name",{placeholder: "グループ名(重複不可)"})%><br/>
+      </div>-->
       <p>グループに入れたいユーザーにチェックしてください</p><br>
       <table class="table">
         <tr><td></td><td>名前</td><td>一言</td></tr>
