@@ -427,6 +427,8 @@ class PagesController < ApplicationController
     return true;
   end
   def redirect_400
-    redirect_to "/400" #,{:status => 400}
+    #redirect_to "/400" #,{:status => 400}
+    #raise ActionController::BadRequest,params[:pages]
+    raise ActionController::RoutingError,params[:pages]#とりあえず404なげる（めんどい）
   end
 end

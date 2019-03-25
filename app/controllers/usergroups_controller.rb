@@ -22,30 +22,23 @@ class UsergroupsController < ApplicationController
     name: name
     )
     params[:usergroup][:check_id].each do |s|
-      usergroup.users<<User.find(s.to_i)
+      user = User.find_by(id:s.to_i)
+      if user
+        usergroup.users<<user
+      end
     end
     redirect_to :action => "index"
     return
   end
   def show
-    force_trailing_slash
+    #force_trailing_slash
     id=params[:id]
-    begin
-      @usergroup=Usergroup.find(id.to_i)
-    rescue
-      #404吐く？
-      redirect_to :action => "index"
-      return
-    end
+    @usergroup=Usergroup.find(id.to_i)
   end
   def edit
     id=params[:id]
-    begin
-      @usergroup=Usergroup.find_by(id:id.to_i)
-    rescue 
-      redirect_to :action =>"new"
-      return
-    end
+    
+    @usergroup=Usergroup.find(id.to_i)
     if(@usergroup.create_user_id != current_user.id)
       #redirect_to :action => "index"
       #return
@@ -54,9 +47,9 @@ class UsergroupsController < ApplicationController
   end
   def update
     id=params[:id]
-    begin
-      usergroup=Usergroup.find(id.to_i)
-    rescue 
+    
+    usergroup=Usergroup.find(id.to_i)
+    if usergroup
       redirect_to :action =>"index"
       return
     end
@@ -75,17 +68,10 @@ class UsergroupsController < ApplicationController
   end
   def destroy
     id = params[:id]
-    begin
-      usergroup=Usergroup.find(id.to_i)
-    rescue 
-      redirect_to :action =>"index"
-      return
-    end
+    
+    usergroup=Usergroup.find(id.to_i)
     if(usergroup.create_user_id == current_user.id)
-      group =Usergroup.find_by(id:params[:id])
-      if(group)
-        group.destroy!
-      end
+      usergroup.destroy!
     end
     redirect_to :action => "index"
     return
