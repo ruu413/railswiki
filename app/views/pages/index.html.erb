@@ -53,8 +53,8 @@
         <%end%>
       <%end%>
       <div><%if @editable%>
-        <%=form_tag('',method: "post",multipart: true) do%>
-          <%=file_field_tag :files,{:multiple => true}%>
+        <%=form_tag('',method: :post,authenticity_token: true, remote: true,multipart: true) do%>
+              <%=file_field_tag :files,{:multiple => true}%>
           <%=submit_tag 'アップロード'%>
         <%end%>
       <%end%></div>

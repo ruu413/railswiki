@@ -3,7 +3,6 @@ class PagesController < ApplicationController
   #before_action ->{renderleft("")},only: [:index,:new,:create]
   #protect_from_forgery except: :create
  
-
   def get_parent_title(name,num)#切り取る数
     if name==nil
       parent=""
