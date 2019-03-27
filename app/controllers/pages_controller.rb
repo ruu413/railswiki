@@ -424,7 +424,7 @@ class PagesController < ApplicationController
       return true
     end
     url = request.original_url
-    if(url.split("?").size()>=2||parent.include?(".")||parent.include?("?")||parent.include?("#"))
+    if(url.split("?").size()>=3||parent.include?(".")||parent.include?("?")||parent.include?("#"))
       return false
     end
     tmp = parent.split("/")
