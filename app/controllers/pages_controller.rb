@@ -199,17 +199,20 @@ class PagesController < ApplicationController
     output_dir=Rails.root.join('storage/files'+@path,"")
     FileUtils.mkdir_p(output_dir,:mode => 755)
     output_path = Rails.root.join('storage/files'+@path,file_param.original_filename)
-    
-    file = Uploadfile.create(
-      file_name: file_param.original_filename,
-      file_content_type: file_param.content_type,
-      #file: file_.tempfile.open.read
-      file_path: output_path
-    ) 
+    if(page.uploadfiles.find_by(file_name: file_param.original_filename)==nil)
+      file = Uploadfile.create(
+        file_name: file_param.original_filename,
+        file_content_type: file_param.content_type,
+        #file: file_.tempfile.open.read
+        file_path: output_path
+      )
+      page.uploadfiles<<file
+    else
+      #page.uploadfiles.find_by(file_name: file_param.original_filename).update(file_name:file_param.original_filename)
+    end
     File.open(output_path, 'w+b') do |fp|
       fp.write  file_param.read
     end
-    page.uploadfiles<<file
   end
   
   def edit
