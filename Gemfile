@@ -4,8 +4,8 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 ruby '2.5.1'
 
 #gem 'carrierwave'
-gem 'refile',github:'refile/refile',require:'refile/rails'
-gem 'refile-mini_magick',github:'refile/refile-mini_magick'
+#gem 'refile',github:'refile/refile',require:'refile/rails'
+#gem 'refile-mini_magick',github:'refile/refile-mini_magick'
 gem 'bootstrap'
 gem 'devise-bootstrap-views'
 gem 'devise-i18n'

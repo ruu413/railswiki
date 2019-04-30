@@ -143,6 +143,7 @@ class PagesController < ApplicationController
     if(page==nil)then return end
     comment=page.comments.create(comment:ERB::Util.html_escape(params[:comment]))
     current_user.comments<<comment
+    page.comments<<comment
   end
   def page_create
     @last_edit_user_id=current_user.id
@@ -180,9 +181,6 @@ class PagesController < ApplicationController
         user_id: page.last_edit_user_id,
       )
       page.updatehistorys<<history
-      while(page.updatehistorys.count>10) do
-        page.updatehistorys[0].destroy
-      end
       #page.files.attach(params[:file][:files])
       #get_parent_title(params[:pages],0)
       #send_data(Uploadfile.find(1).file.download,filename:"a.png")
@@ -293,6 +291,10 @@ class PagesController < ApplicationController
         user_id: @page.last_edit_user_id,
       )
       @page.updatehistorys<<history
+      
+      while(@page.updatehistorys.count>10) do
+        @page.updatehistorys[0].destroy
+      end
     end
     redirect_to(@path)
   end
@@ -340,7 +342,7 @@ class PagesController < ApplicationController
     @parent,@title=get_parent_title(params[:pages],0)
     page=Page.where(parent:@parent).find_by(title:@title)
     comment = page.comments.find(params[:comment_id].to_i)
-    if comment !=nil
+    if (comment !=nil&&(is_editable?(page)||comment.user_id==current_user.id))
       comment.destroy
     end
   end
@@ -430,7 +432,7 @@ class PagesController < ApplicationController
       return true
     end
     url = request.original_url
-    if(url.split("?").size()>=2||parent.include?(".")||parent.include?("?")||parent.include?("#"))
+    if(url.split("?").size()>=3||parent.include?(".")||parent.include?("?")||parent.include?("#"))
       return false
     end
     tmp = parent.split("/")
