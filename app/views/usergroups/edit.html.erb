@@ -9,17 +9,17 @@
       </div>-->
       <p>グループに入れたいユーザーにチェックしてください</p><br>
       <table class="table">
-        <tr><td></td><td>名前</td><td>一言</td></tr>
+        <tr><td></td><td>名前</td><!--<td>一言</td>--></tr>
         <%@users.each do |user|%>
           <tr>
             <%flag_ = @usergroup.users.ids.include?(user.id)%>
             <td><%=check_box("usergroup","check_id",{:checked=>flag_,:multiple=> true},user.id.to_s,nil)%></td>
             <td><%=user.name%></td>
-            <td><%=user.description%></td>
+            <!--<td><%#=user.description%></td>-->
           </tr>
         <%end%>
       </table>
-      <%=submit_tag "登録"%>
+      <%=submit_tag "登録",:class =>"btn btn-primary"%>
     <%end%>
   </div>
 </div>

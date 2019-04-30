@@ -2,22 +2,23 @@
 <div class="center">
   <div><%=render :partial => "pages/pankuzu"%></div>
   <%=form_tag('',method: @method,multipart: true) do%>
-    <p>
-      <%= text_area_tag "content",@content,placeholder: "入力してください",:class=>"input-large"%>
-    </p>
-    <p>
+    <div>
+      <%= text_area_tag "content",@content,placeholder: "入力してください",:class=>"form-control",:style=>"height: 500px;"%>
+    </div>
+    <div>閲覧可能グループ:
       <%if @page == nil||@page.readable_group_id==nil||@page.readable_group_id==0||Usergroup.find_by(id:@page.readable_group_id)==nil%>
         <%=select_tag "readable_group_id",@commongroup_readable.html_safe+options_from_collection_for_select(@usergroups,:id,:name)%>
       <%else%>
         <%=select_tag "readable_group_id",@commongroup_readable.html_safe+options_from_collection_for_select(@usergroups,:id,:name,@page.readable_group_id)%>
       <%end%>
+      編集可能グループ:
       <%if @page == nil||@page.editable_group_id==nil||@page.editable_group_id==0||Usergroup.find_by(id:@page.editable_group_id)==nil%>
         <%=select_tag "editable_group_id",@commongroup_editable.html_safe+options_from_collection_for_select(@usergroups,:id,:name)%>
       <%else%>
         <%=select_tag "editable_group_id",@commongroup_editable.html_safe+options_from_collection_for_select(@usergroups,:id,:name,@page.editable_group_id)%>
       <%end%>
-      <%=submit_tag '登録'%>
-    </p>
+      <%=submit_tag '登録',:class => "btn btn-primary"%>
+    </div>
   <%end%>
 </div>
 <div class="right"><%=render :partial => "pages/right"%></div>

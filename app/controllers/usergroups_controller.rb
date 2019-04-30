@@ -10,7 +10,7 @@ class UsergroupsController < ApplicationController
   end
   def create
     name = ERB::Util.html_escape(params[:usergroup][:name])
-    if(name==nil||params[:usergroup][:check_id]==nil)
+    if(name==nil||params[:usergroup][:check_id]==nil||name=="")
       redirect_to :action => "index"
       return
     end

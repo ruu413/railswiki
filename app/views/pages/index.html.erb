@@ -9,7 +9,7 @@
   <%else%>
     <h2><%=@page.title%></h2>
     <%user = User.find_by(id:@page.last_edit_user_id)%>
-    <p>last edited by <%=if user then user.name else "???" end%></p>
+    <p>last edited by <%=if user then user.name else "???" end%> <%=@page.updated_at.to_s%></p>
     <!--<input type="button" class="btn btn-default" onClick="location.href='<%=@path+"edit"%>'" value="編集">-->
     <%#button_to "削除",{:method=>"delete"},{:class=>"btn btn-default"} %>
     <%if @editable%>
@@ -38,39 +38,42 @@
   <div><%=raw @content%></div>
   <div>
     <%if @readable%>
-      <p>コメント</p>
+      <p><b>コメント</b></p>
+      <table>
       <%@page.comments.each do |comment|%>
+        <tr><td>
         <p>ユーザー名 <%=comment.user.name%></p>
         <%=comment.comment%>
         <%if @editable%>
           <%=button_to("削除",{:action =>"destroy",:comment_id=>comment.id},:method=>:delete)%>
         <%end%>
+        </td></tr>
       <%end%>
       <%if user_signed_in?%>
         <%=form_tag do%>
-          <%=text_area_tag "comment","コメント",placeholder:"コメント"%>
+          <%=text_area_tag "comment","コメント",placeholder:"コメント",:class=>"form-control"%>
           <%=submit_tag '投稿'%>
         <%end%>
       <%end%>
       <div><%if @editable%>
         <%=form_tag('',method: "post",multipart: true) do%>
-          <%=file_field_tag :files,{:multiple => true}%>
-          <%=submit_tag 'アップロード'%>
+          <%=file_field_tag :files,{:multiple => false}%>
+          <%=submit_tag 'アップロード',:class =>"btn btn-default"%>
         <%end%>
       <%end%></div>
       <%if @readable%>
-        <div>添付ファイル<br>
+        <div><b>添付ファイル</b><br>
           <%@page.uploadfiles.each do |file|%>
             <%filepath=file.file_name%>
             <%=link_to file.file_name,filepath%>
           <%end%>
         </div><div>
-          <p>変更履歴</p>
-          <%@page.updatehistorys.limit(100).each do |hist|%>
+          <p><b>変更履歴</b></p>
+          <%@page.updatehistorys.limit(10).reverse_each do |hist|%>
             <p>
               <%=hist.update_time.to_s%><br>
               <%user = User.find_by(id:hist.user_id)%>
-              <%=if user then user.name else "???"end%>
+              edited by <%=if user then user.name else "???"end%>
             </p>
           <%end%>
         </div>

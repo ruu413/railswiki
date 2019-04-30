@@ -180,6 +180,9 @@ class PagesController < ApplicationController
         user_id: page.last_edit_user_id,
       )
       page.updatehistorys<<history
+      while(page.updatehistorys.count>10) do
+        page.updatehistorys[0].destroy
+      end
       #page.files.attach(params[:file][:files])
       #get_parent_title(params[:pages],0)
       #send_data(Uploadfile.find(1).file.download,filename:"a.png")
