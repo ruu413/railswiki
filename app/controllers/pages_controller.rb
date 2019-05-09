@@ -76,7 +76,7 @@ class PagesController < ApplicationController
         @readable=true
         @content = CommonMarker.render_html(ERB::Util.html_escape(@page.content))
       else
-        @page =nil
+        #@page =nil
         @content="アクセス権限がありません"
       end
     else
