@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby '2.5.1'
+ruby '2.6.3'
 
 #gem 'carrierwave'
 #gem 'refile',github:'refile/refile',require:'refile/rails'
@@ -75,3 +75,8 @@ end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
+
+
+gem 'unicorn'
+gem 'dotenv-rails'
+gem 'carrierwave'

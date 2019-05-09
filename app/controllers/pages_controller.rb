@@ -74,7 +74,7 @@ class PagesController < ApplicationController
       end
       if is_readable?(@page)
         @readable=true
-        @content = CommonMarker.render_html(@page.content)
+        @content = CommonMarker.render_html(ERB::Util.html_escape(@page.content))
       else
         @page =nil
         @content="アクセス権限がありません"
@@ -165,7 +165,7 @@ class PagesController < ApplicationController
       editable_group_id=params[:editable_group_id].to_i
     end
     
-    @content = ERB::Util.html_escape(params[:content])
+    @content = params[:content]#ERB::Util.html_escape(params[:content])
     if Page.where(parent:@parent).find_by(title:@title)==nil
       page=Page.create!(
         last_edit_user_id: @last_edit_user_id,
@@ -271,8 +271,8 @@ class PagesController < ApplicationController
       redirect_to @path
       return
     end
-    @content = ERB::Util.html_escape(params[:content])
-
+    #@content = ERB::Util.html_escape(params[:content])
+    @content = params[:content]
     if params[:readable_group_id]=="nil"
       readable_group_id=nil
     else
