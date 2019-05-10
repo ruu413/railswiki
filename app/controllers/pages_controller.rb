@@ -292,8 +292,8 @@ class PagesController < ApplicationController
       )
       @page.updatehistorys<<history
       
-      while(@page.updatehistorys.count>10) do
-        @page.updatehistorys[0].destroy
+      if(@page.updatehistorys.count>10) 
+        @page.updatehistorys[0].delete
       end
     end
     redirect_to(@path)
@@ -390,6 +390,9 @@ class PagesController < ApplicationController
     if !user_signed_in?
       return false
     end
+    if current_user.admin
+      return true
+    end
     begin
       if Usergroup.find(page.editable_group_id).users.ids.include?(current_user.id)
         return true
@@ -413,6 +416,9 @@ class PagesController < ApplicationController
       end
     elsif !user_signed_in?
       return false
+    end
+    if current_user.admin
+      return true
     end
     begin
       if Usergroup.find(page.readable_group_id).users.ids.include?(current_user.id)

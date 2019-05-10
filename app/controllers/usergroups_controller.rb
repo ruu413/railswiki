@@ -9,7 +9,7 @@ class UsergroupsController < ApplicationController
     @users=User.all
   end
   def create
-    name = ERB::Util.html_escape(params[:usergroup][:name])
+    name = params[:usergroup][:name]#ERB::Util.html_escape(params[:usergroup][:name])
     if(name==nil||params[:usergroup][:check_id]==nil||name=="")
       redirect_to :action => "index"
       return
@@ -90,8 +90,7 @@ class UsergroupsController < ApplicationController
     if usergroup == nil
       return false
     end
-    if usergroup.create_user_id == current_user.id
-    #usergroup.users.ids.include? current_user.id
+    if ((usergroup.create_user_id == current_user.id)||(usergroup.users.ids.include? current_user.id))
       return true
     end
     return false

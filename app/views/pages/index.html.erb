@@ -42,7 +42,7 @@
       <table class="table">
       <%@page.comments.each do |comment|%>
         <tr><td>
-        <p>ユーザー名 <%=comment.user.name%></p>
+        <p>ユーザー名 <%=comment.user.name%> 投稿日時:<%=comment.updated_at.to_s%></p>
         <%=comment.comment%>
         <%if user_signed_in?&&(@editable||comment.user.id==current_user.id)%>
           <%=button_to("削除",{:action =>"destroy",:comment_id=>comment.id},:method=>:delete,:class=>"btn btn-default")%>
