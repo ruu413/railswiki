@@ -35,8 +35,11 @@ def readcontent path
   end
   str=File.open(path).read
   begin
-    if(Page.where(parent:parent).find_by(title:title)==nil)
+    page=Page.where(parent:parent).find_by(title:title)
+    if page==nil
       Page.create(parent:parent,title:title,last_edit_user_id:0,content:str)
+    else
+       page.update(content:str)
     end
   rescue => e
     puts e
@@ -68,14 +71,15 @@ def readfile path
   #str=File.open(path).read
   begin
     page =Page.where(parent:parent).find_by(title:title)
-    if(page!=nil)
-      FileUtils.mkpath($storage_dir+path_)
-      FileUtils.cp_r(path,$storage_dir+path_+"/"+file_name)
-      if( page.uploadfiles.find_by(file_name:file_name)==nil)
-        file = Uploadfile.create(file_name:file_name,file_path:path_+"/"+file_name)
-        puts $storage_dir+path_+file_name
-        page.uploadfiles<<file
-      end
+    if(page==nil)
+      page=Page.create(parent:parent,title:title,content:"",last_edit_user_id:0)
+    end
+    FileUtils.mkpath($storage_dir+path_)
+    FileUtils.cp_r(path,$storage_dir+path_+"/"+file_name)
+    if( page.uploadfiles.find_by(file_name:file_name)==nil)
+      file = Uploadfile.create(file_name:file_name,file_path:path_+"/"+file_name)
+      puts $storage_dir+path_+file_name
+      page.uploadfiles<<file
     end
   rescue => e
     puts e
