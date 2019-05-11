@@ -284,11 +284,12 @@ class PagesController < ApplicationController
       editable_group_id=params[:editable_group_id].to_i
     end
     if @page!=nil
-      @page.update!(content:@content,readable_group_id:readable_group_id,editable_group_id:editable_group_id)
+      hist_user_id = @page.last_edit_user_id
+      @page.update!(last_edit_user_id:current_user.id,content:@content,readable_group_id:readable_group_id,editable_group_id:editable_group_id)
       history = Updatehistory.create(
         update_time: @page.updated_at,
         content: @page.content,
-        user_id: @page.last_edit_user_id,
+        user_id: hist_user_id,
       )
       @page.updatehistorys<<history
       
