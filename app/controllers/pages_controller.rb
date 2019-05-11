@@ -349,19 +349,24 @@ class PagesController < ApplicationController
   def renderleft str
     if str == nil || str == "/" then str = "" end
     if str.end_with? "/" then str.chop! end
-    children = Page.where(parent:str).select(:parent,:title)
+    children = Page.where(parent:str).select(:parent,:title,:readable_group_id)
     @left_content=[]
     children.each do |child|
+      if(!is_readable?(child))then next end
       path = createpath(child.parent,child.title)
       if(child.title=="")then next end
       @left_content+=[[child.title,path]]
     end
   end
   def renderright
-    new50 = Page.limit(50).order("updated_at DESC").select(:parent,:title)
+    new100 = Page.limit(100).order("updated_at DESC").select(:parent,:title,:readable_group_id)
     @right_content=[]
-    new50.each do |item|
+    num = 50
+    new100.each do |item|
+      if(!is_readable?(item))then next end
+      num-=1
       @right_content+=[createpath(item.parent,item.title)]
+      if(num<=0)then break end
     end
   end
   def createpath( parent, title)
