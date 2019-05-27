@@ -1,7 +1,12 @@
 <div class="left"><%=render :partial => "pages/left"%></div>
 <div class="center">
-  <%@pages.each do |page| %>
-    <%=link_to page.title,page.parent+"/"+page.title%>
+  <%@pages.each_with_index do |page,i| %>
+    <div>
+      <%path = page.parent+"/"+page.title%>
+      <%if page.title=="" then path ="/"end%>
+      <div><%=i+1%>. <%=link_to path,path%></div>
+      <div><%=page.content[0,100]%></div>
+    </div>
   <% end %>
 </div>
 <div class="right"><%=render :partial => "pages/right"%></div>
