@@ -26,7 +26,18 @@ class PagesController < ApplicationController
     return parent,title
   end
   def index
-    if params[:format]==nil
+    if(params[:search]!=nil)
+      search
+      return
+    elsif(params[:new]!=nil)
+      new
+      render :action=>"new"
+      return
+    elsif(params[:edit]!=nil)
+      edit
+      #render :action=>"edit"
+      return
+    elsif params[:format]==nil
       
       if(!is_valid_url?)
         redirect_400
@@ -38,6 +49,15 @@ class PagesController < ApplicationController
       #render :nothing=>true and return
     end
   end
+
+  def search
+    searchstr= params[:search]
+    @pages=Page.where("CONCAT(title,content) LIKE ?", "%"+searchstr+"%")
+    renderleft "/"
+    renderright
+    render :file=>"pages/search"
+  end
+
   def file_show
     @parent,@title=get_parent_title(params[:pages],0)
     filename=@title+"."+params[:format]
@@ -56,16 +76,6 @@ class PagesController < ApplicationController
   end
   def page_show
     force_trailing_slash
-    if(params[:new]!=nil)
-      new
-      render :action=>"new"
-      return
-    end
-    if(params[:edit]!=nil)
-      edit
-      #render :action=>"edit"
-      return
-    end
     @parent,@title=get_parent_title(params[:pages],0)
     #send_data(Uploadfile.find(2).file.download,filename:"a.png",:disposition=>"inline")
     @path=createpath(@parent,@title)

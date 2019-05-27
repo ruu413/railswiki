@@ -1,0 +1,7 @@
+<div class="left"><%=render :partial => "pages/left"%></div>
+<div class="center">
+  <%@pages.each do |page| %>
+    <%=link_to page.title,page.parent+"/"+page.title%>
+  <% end %>
+</div>
+<div class="right"><%=render :partial => "pages/right"%></div>
