@@ -4,7 +4,8 @@
   <div>
   <%if @page == nil%>
     <%if user_signed_in?%>
-      <%=button_to "新規作成",{:action => "new"},:class=>"btn btn-primary" %>
+      <%#=button_to "新規作成",{:action=>"index",:new=>"1"},:method=>"get",:class=>"btn btn-primary" %>
+      <button onClick=window.location.href="?new=1" class="btn btn-primary">新規作成</button>
     <%end%>
   <%else%>
     <h2><%=@page.title%></h2>
@@ -15,7 +16,8 @@
     <%if @editable && @readable%>
       <div>
         <div style= "float:left;">
-          <%=button_to "編集",{:action => "edit"},:class=>"btn btn-default" %>
+          <button onClick=window.location.href="?edit=1" class="btn btn-default">編集</button>
+          <%#=button_to "編集",{:action => "edit"},:class=>"btn btn-default" %>
         </div><div style= "float:right;">
           <%=button_to "削除",{:action => "destroy"},:class=>"btn btn-danger",:method=>:delete  %>
         </div>
@@ -43,7 +45,7 @@
       <%@page.comments.each do |comment|%>
         <tr><td>
         <p>ユーザー名 <%=comment.user.name%> 投稿日時:<%=comment.updated_at.to_s%></p>
-        <%=comment.comment%>
+        <%=raw comment.comment%>
         <%if user_signed_in?&&(@editable||comment.user.id==current_user.id)%>
           <%=button_to("削除",{:action =>"destroy",:comment_id=>comment.id},:method=>:delete,:class=>"btn btn-default")%>
         <%end%>

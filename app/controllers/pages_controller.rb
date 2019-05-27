@@ -26,7 +26,18 @@ class PagesController < ApplicationController
     return parent,title
   end
   def index
-    if params[:format]==nil
+    if(params[:search]!=nil)
+      search
+      return
+    elsif(params[:new]!=nil)
+      new
+      render :action=>"new"
+      return
+    elsif(params[:edit]!=nil)
+      edit
+      #render :action=>"edit"
+      return
+    elsif params[:format]==nil
       
       if(!is_valid_url?)
         redirect_400
@@ -38,6 +49,21 @@ class PagesController < ApplicationController
       #render :nothing=>true and return
     end
   end
+
+  def search
+    @pages=[]
+    if(params[:search]!="")
+      searchstr= params[:search].split
+      @pages=Page.where("CONCAT(title,content) LIKE ?", "%"+searchstr.pop+"%")
+      searchstr.each do |str|
+        @pages=@pages.where("CONCAT(title,content) LIKE ?", "%"+str+"%")
+      end
+    end
+    renderleft "/"
+    renderright
+    render :file=>"pages/search"
+  end
+
   def file_show
     @parent,@title=get_parent_title(params[:pages],0)
     filename=@title+"."+params[:format]
@@ -45,7 +71,7 @@ class PagesController < ApplicationController
     page=Page.where(parent:@parent).find_by(title:@title)
     file=nil
     file=page.uploadfiles.find_by(file_name:filename)
-    if file!=nil
+    if file!=nil && is_readable?(page)
       filedata = File.open(file.file_path,"r").read
       send_data(filedata,filename:file.file_name,:disposition=>"inline")
     else
@@ -104,7 +130,7 @@ class PagesController < ApplicationController
       if @path == ""
         @path = "/"
       end
-      redirect_to(@path+"edit")
+      redirect_to(@path+"?edit=1")
     end
     @content=''
     @method='post'
@@ -121,7 +147,7 @@ class PagesController < ApplicationController
       return
     end
     if(params[:content]!=nil)
-      @parent,@title=get_parent_title(params[:pages],1)
+      @parent,@title=get_parent_title(params[:pages],0)
       path = createpath(@parent,@title)
       page_create
     end
@@ -141,13 +167,13 @@ class PagesController < ApplicationController
     @parent,@title=get_parent_title(params[:pages],0)
     page=Page.where(parent:@parent).find_by(title:@title)
     if(page==nil)then return end
-    comment=page.comments.create(comment:ERB::Util.html_escape(params[:comment]))
+    comment=page.comments.create(comment:CommonMarker.render_html(ERB::Util.html_escape(params[:comment])))
     current_user.comments<<comment
     page.comments<<comment
   end
   def page_create
     @last_edit_user_id=current_user.id
-    @parent,@title=get_parent_title(params[:pages],1)
+    @parent,@title=get_parent_title(params[:pages],0)
     @path=createpath(@parent,@title)
     if(Page.where(parent:@parent).find_by(title:@title))
       update
@@ -234,7 +260,7 @@ class PagesController < ApplicationController
       if @path == ""
         @path = "/"
       end
-      redirect_to(@path+"new")
+      redirect_to(@path+"?new=1")
       return
     end
     @commongroup_editable="<option value='nil'>全員</option><option value='0'>自分のみ</option>"
@@ -263,7 +289,7 @@ class PagesController < ApplicationController
       redirect_400
       return
     end
-    @parent,@title=get_parent_title(params[:pages],1)
+    @parent,@title=get_parent_title(params[:pages],0)
     @path=createpath(@parent,@title)
     
     @page=Page.where(parent:@parent).find_by(title:@title)
@@ -439,26 +465,7 @@ class PagesController < ApplicationController
   end
 
   def is_valid_url?
-    parent=params[:pages]
-    if parent == nil
-      return true
-    end
-    url = request.original_url
-    if(url.split("?").size()>=3||parent.include?(".")||parent.include?("?")||parent.include?("#"))
-      return false
-    end
-    tmp = parent.split("/")
-    if(tmp[tmp.size()-1]=="new"||tmp[tmp.size()-1]=="edit")
-      tmp.pop
-      parent=tmp.join
-    end
-    while(parent!="")do
-      parent,title=get_parent_title(parent,0)
-      if title == "new"||title=="edit"
-        return false
-      end
-    end
-    return true;
+    return true
   end
   def redirect_400
     #redirect_to "/400" #,{:status => 400}
