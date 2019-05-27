@@ -1,7 +1,10 @@
 $controller = PagesController.new
 $content_dir = "./pukiwiki/content/"
 $file_dir="./pukiwiki/static/"
-$storage_dir="./storage/files/"
+$storage_dir="./storage/files"
+$abs_storage_dir=Dir.pwd+$storage_dir[1,$storage_dir.size-1]
+$group_id = 3
+puts $abs_storage_dir
 $err=""
 $err_f=[]
 def migrate_pukiwiki
@@ -37,9 +40,9 @@ def readcontent path
   begin
     page=Page.where(parent:parent).find_by(title:title)
     if page==nil
-      Page.create(parent:parent,title:title,last_edit_user_id:0,content:str)
+      Page.create(readable_group_id:$group_id,editable_group_id:$group_id,parent:parent,title:title,last_edit_user_id:0,content:str)
     else
-       page.update(content:str)
+       page.update(content:str,readable_group_id:$group_id,editable_group_id:$group_id)
     end
   rescue => e
     puts e
@@ -72,13 +75,13 @@ def readfile path
   begin
     page =Page.where(parent:parent).find_by(title:title)
     if(page==nil)
-      page=Page.create(parent:parent,title:title,content:"",last_edit_user_id:0)
+      page=Page.create(readable_group_id:$group_id,editable_group_id:$group_id,parent:parent,title:title,content:"",last_edit_user_id:0)
     end
     FileUtils.mkpath($storage_dir+path_)
     FileUtils.cp_r(path,$storage_dir+path_+"/"+file_name)
-    if( page.uploadfiles.find_by(file_name:file_name)==nil)
-      file = Uploadfile.create(file_name:file_name,file_path:path_+"/"+file_name)
-      puts $storage_dir+path_+file_name
+    if( true||page.uploadfiles.find_by(file_name:file_name)==nil)
+      file = Uploadfile.create(file_name:file_name,file_path:$abs_storage_dir+path_+"/"+file_name)
+      puts $storage_dir+path_+"/"+file_name
       page.uploadfiles<<file
     end
   rescue => e
