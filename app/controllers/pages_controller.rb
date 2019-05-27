@@ -51,8 +51,14 @@ class PagesController < ApplicationController
   end
 
   def search
-    searchstr= params[:search]
-    @pages=Page.where("CONCAT(title,content) LIKE ?", "%"+searchstr+"%")
+    @pages=[]
+    if(params[:search]!="")
+      searchstr= params[:search].split
+      @pages=Page.where("CONCAT(title,content) LIKE ?", "%"+searchstr.pop+"%")
+      searchstr.each do |str|
+        @pages=@pages.where("CONCAT(title,content) LIKE ?", "%"+str+"%")
+      end
+    end
     renderleft "/"
     renderright
     render :file=>"pages/search"
