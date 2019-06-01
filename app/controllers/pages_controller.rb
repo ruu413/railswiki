@@ -3,7 +3,7 @@ class PagesController < ApplicationController
   #before_action ->{renderleft("")},only: [:index,:new,:create]
   #protect_from_forgery except: :create
  
-
+  #pathを親とタイトル要素に分けて parent,titleで返す
   def get_parent_title(name,num)#切り取る数
     if name==nil
       parent=""
@@ -25,6 +25,14 @@ class PagesController < ApplicationController
     end
     return parent,title
   end
+
+  # settings/以外のgetで呼ばれる
+  # paramによって処理を分ける
+  #　?search 検索
+  #　?new   新規ページ作成
+  #　?edit 既存ページ編集
+  #　?format /[.]/があった時 ファイル表示
+  # それらの要素がなかった時 ページ表示
   def index
     if(params[:search]!=nil)
       search
@@ -50,6 +58,7 @@ class PagesController < ApplicationController
     end
   end
 
+  #
   def search
     @pages=[]
     if(params[:search]!="")
@@ -65,17 +74,25 @@ class PagesController < ApplicationController
   end
 
   def file_show
-    @parent,@title=get_parent_title(params[:pages],0)
-    filename=@title+"."+params[:format]
-    @parent,@title=get_parent_title(params[:pages],1)
-    page=Page.where(parent:@parent).find_by(title:@title)
+    parent,title=get_parent_title(params[:pages],0)
+    filename=title+"."+params[:format]
+    parent,title=get_parent_title(params[:pages],1)
+    page=Page.where(parent:parent).find_by(title:title)
     file=nil
     file=page.uploadfiles.find_by(file_name:filename)
     if file!=nil && is_readable?(page)
       filedata = File.open(file.file_path,"r").read
-      send_data(filedata,filename:file.file_name,:disposition=>"inline")
+      f = filename.split(/[.]/)
+      if(f.size()==2&&(f[1]=="png"||f[1]=="jpg"||f[1]=="jpeg"||f[1]=='gif'))
+        #send_data(filedata,filename:file.file_name,:disposition=>"inline")
+        send_file(file.file_path,filename:file.file_name,:disposition=>"inline")
+      else
+        #send_data(filedata,filename:file.file_name,:disposition=>"attachment")
+        send_file(file.file_path,filename:file.file_name,:disposition=>"attachment")
+      end
     else
-      #render :staturs=>404  
+      redirect_400
+      return
       #後でno imageでも返すようにする
     end
     #render :nothing=>true and return
@@ -164,22 +181,22 @@ class PagesController < ApplicationController
     return
   end
   def comment_create
-    @parent,@title=get_parent_title(params[:pages],0)
-    page=Page.where(parent:@parent).find_by(title:@title)
+    parent,title=get_parent_title(params[:pages],0)
+    page=Page.where(parent:parent).find_by(title:title)
     if(page==nil)then return end
     comment=page.comments.create(comment:CommonMarker.render_html(ERB::Util.html_escape(params[:comment])))
     current_user.comments<<comment
     page.comments<<comment
   end
   def page_create
-    @last_edit_user_id=current_user.id
-    @parent,@title=get_parent_title(params[:pages],0)
-    @path=createpath(@parent,@title)
-    if(Page.where(parent:@parent).find_by(title:@title))
+    last_edit_user_id=current_user.id
+    parent,title=get_parent_title(params[:pages],0)
+    path=createpath(parent,title)
+    if(Page.where(parent:parent).find_by(title:title))
       update
       return
     end
-    @usergroups=Usergroup.all
+    usergroups=Usergroup.all
     if params[:readable_group_id]=="nil"
       readable_group_id=nil
     else
@@ -191,13 +208,13 @@ class PagesController < ApplicationController
       editable_group_id=params[:editable_group_id].to_i
     end
     
-    @content = params[:content]#ERB::Util.html_escape(params[:content])
-    if Page.where(parent:@parent).find_by(title:@title)==nil
+    content = params[:content]#ERB::Util.html_escape(params[:content])
+    if Page.where(parent:parent).find_by(title:title)==nil
       page=Page.create!(
-        last_edit_user_id: @last_edit_user_id,
-        parent: @parent,
-        title:  @title,
-        content: @content,
+        last_edit_user_id: last_edit_user_id,
+        parent: parent,
+        title:  title,
+        content: content,
         readable_group_id: readable_group_id,
         editable_group_id: editable_group_id
       )
@@ -221,11 +238,12 @@ class PagesController < ApplicationController
     end
   end
   def file_create file_param,page
-    @parent,@title=get_parent_title(params[:pages],0)
-    @path=createpath(@parent,@title)
-    output_dir=Rails.root.join('storage/files'+@path,"")
+    parent,title=get_parent_title(params[:pages],0)
+    path=createpath(parent,title)
+    path=path.gsub(/\.\./,"")
+    output_dir=Rails.root.join('storage/files'+path,"")
     FileUtils.mkdir_p(output_dir,:mode => 755)
-    output_path = Rails.root.join('storage/files'+@path,file_param.original_filename)
+    output_path = Rails.root.join('storage/files'+path,file_param.original_filename)
     if(page.uploadfiles.find_by(file_name: file_param.original_filename)==nil)
       file = Uploadfile.create(
         file_name: file_param.original_filename,
@@ -330,13 +348,13 @@ class PagesController < ApplicationController
       redirect_400
       return
     end
-    @parent,@title=get_parent_title(params[:pages],0)
-    path = createpath(@parent,@title)
+    parent,title=get_parent_title(params[:pages],0)
+    path = createpath(parent,title)
     if !user_signed_in? 
       redirect_to path
       return
     end
-    page=Page.where(parent:@parent).find_by(title:@title)
+    page=Page.where(parent:parent).find_by(title:title)
     if params[:comment_id]!=nil
       comment_destroy
     elsif params[:file_id]!=nil
@@ -351,23 +369,23 @@ class PagesController < ApplicationController
     redirect_to path
   end
   def page_destroy
-    @parent,@title=get_parent_title(params[:pages],0)
-    page=Page.where(parent:@parent).find_by(title:@title)
+    parent,title=get_parent_title(params[:pages],0)
+    page=Page.where(parent:parent).find_by(title:title)
     if page!=nil
       page.destroy
     end
   end
   def file_destroy
-    @parent,@title=get_parent_title(params[:pages],0)
-    page=Page.where(parent:@parent).find_by(title:@title)
+    parent,title=get_parent_title(params[:pages],0)
+    page=Page.where(parent:parent).find_by(title:title)
     file = page.uploadfiles.find(params[:file_id].to_i)
     if file !=nil
       file.destroy
     end
   end
   def comment_destroy
-    @parent,@title=get_parent_title(params[:pages],0)
-    page=Page.where(parent:@parent).find_by(title:@title)
+    parent,title=get_parent_title(params[:pages],0)
+    page=Page.where(parent:parent).find_by(title:title)
     comment = page.comments.find(params[:comment_id].to_i)
     if (comment !=nil&&(is_editable?(page)||comment.user_id==current_user.id))
       comment.destroy

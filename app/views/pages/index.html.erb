@@ -69,7 +69,7 @@
         <div>
           <%@page.uploadfiles.each do |file|%>
             <%filepath=file.file_name%>
-            <%=link_to file.file_name,filepath%>
+            <%=link_to file.file_name,filepath,target: :_blank%>
           <%end%>
         </div><div>
           <p><b>変更履歴</b></p>
