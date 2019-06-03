@@ -60,13 +60,20 @@ class PagesController < ApplicationController
 
   #
   def search
-    @pages=[]
+    @pages=Page.where(readable_group_id:nil)
+    if current_user != nil
+      current_user.usergroups.ids.each do |id|
+        @Pages=@pages.or(Page.where(readable_group_id:id))
+      end
+    end
     if(params[:search]!="")
       searchstr= params[:search].split
-      @pages=Page.where("CONCAT(title,content) LIKE ?", "%"+searchstr.pop+"%")
+      @pages=@pages.where("CONCAT(title,content) LIKE ?", "%"+searchstr.pop+"%")
       searchstr.each do |str|
         @pages=@pages.where("CONCAT(title,content) LIKE ?", "%"+str+"%")
       end
+    else
+      @pages=[]
     end
     renderleft "/"
     renderright
@@ -175,6 +182,7 @@ class PagesController < ApplicationController
     end
     file_=params[:files]
     if file_!=nil && page!=nil&&is_editable?(page)
+      #ファイルをアップできるのは編集者だけ
       file_create file_,page
     end
     redirect_to path

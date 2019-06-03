@@ -76,7 +76,7 @@
           <%@page.updatehistorys.limit(10).reverse_each do |hist|%>
             <p>
               <%=hist.update_time.to_s%><br>
-              <%user = User.find_by(id:hist.user_id)%>
+              <%user = hist.user#User.find_by(id:hist.user_id)%>
               edited by <%=if user then user.name else "???"end%>
             </p>
           <%end%>
