@@ -3,9 +3,11 @@
 worker_processes Integer(ENV["WEB_CONCURRENCY"] || 3)
  timeout 15
  preload_app true
- 
- listen '/home/user/ruu/railswiki/tmp/unicorn.sock'
- pid    '/home/user/ruu/railswiki/tmp/unicorn.pid'
+
+ root = Dir::pwd
+ #root = "/var/www/railswiki"
+ listen root+'/tmp/unicorn.sock'
+ pid    root+'/tmp/unicorn.pid'
  
  before_fork do |server, worker|
    Signal.trap 'TERM' do

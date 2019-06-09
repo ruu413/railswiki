@@ -1,2 +1,4 @@
+#!/bin/bash
+cd /var/www/railswiki/
 export SECRET_KEY_BASE="bundle exec rake secret"
-rails unicorn:start
+bundle exec rails unicorn:start
