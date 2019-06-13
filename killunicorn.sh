@@ -1,3 +1,3 @@
 #!/bin/bash
-#cd /var/www/railswiki/
+cd /var/www/railswiki/
 bundle exec rails unicorn:stop

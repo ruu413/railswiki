@@ -64,10 +64,10 @@ class PagesController < ApplicationController
     #@pages=@pages.or(Page.where(readable_group_id:3))
     if current_user != nil
       current_user.usergroups.ids.each do |id|
-        @pages=@pages.or(Page.where(readable_group_id:id.to_i))
+        @pages=@pages.or(Page.where(readable_group_id:id))
       end
+      @pages.or(Page.where(readable_group_id:0,last_edit_user_id:current_user.id))
     end
-    @pages.or(Page.where(readable_group_id:0,last_edit_user_id:current_user.id))
     if(params[:search]!="")
       searchstr= params[:search].split
       @pages=@pages.where("CONCAT(title,content) LIKE ?", "%"+searchstr.pop+"%")
